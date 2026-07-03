@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kirim Berkas Verifikasi Pajak — Payment Request</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="brand-mark">PR</span> Logbook Verifikasi Pajak</div>
+    <nav class="nav-tabs">
+      <a href="index.html" class="active">Kirim Berkas</a>
+      <a href="tracking.html">Tracking &amp; Verifikasi</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1>Kirim Berkas Verifikasi Pajak</h1>
+    <p>Formulir pengajuan verifikasi pajak pada Payment Request (NC). Pengisian wajib memakai huruf KAPITAL. Unggah berkas dalam format PDF.</p>
+  </div>
+
+  <div class="card">
+    <form id="submitForm">
+      <div class="form-grid">
+
+        <div class="field required">
+          <label for="cabang">Cabang</label>
+          <select id="cabang" required>
+            <option value="" disabled selected>Pilih kode cabang</option>
+            <option value="HHO">HHO — Head Office</option>
+            <option value="MML">MML — Main Dealer</option>
+            <option value="__custom">Kode cabang lain (3 huruf)…</option>
+          </select>
+          <input type="text" id="cabangCustom" maxlength="3" placeholder="Contoh: BDG" style="display:none; text-transform:uppercase;">
+        </div>
+
+        <div class="field required">
+          <label for="namaPic">Nama PIC yang Mengajukan</label>
+          <input type="text" id="namaPic" placeholder="NAMA LENGKAP" required>
+        </div>
+
+        <div class="field required">
+          <label for="noTelpon">No. Telepon PIC</label>
+          <input type="tel" id="noTelpon" placeholder="08XXXXXXXXXX" required>
+        </div>
+
+        <div class="field">
+          <label for="noPaymentRequest">No. Payment Request (NC)</label>
+          <div class="hint">Jika lebih dari satu, tulis satu per baris.</div>
+          <textarea id="noPaymentRequest" rows="3" placeholder="NC/XXX/XX/XXXXX
+NC/XXX/XX/XXXXX"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="linkPaymentRequest">Link Payment Request</label>
+          <div class="hint">Jika lebih dari satu, tulis satu per baris.</div>
+          <textarea id="linkPaymentRequest" rows="3" placeholder="https://teds2.tunasdwipamatra.com/web#id=....."></textarea>
+        </div>
+
+        <div class="field full required">
+          <label>Berkas PDF</label>
+          <label class="dropzone" id="dropzone">
+            <input type="file" id="fileInput" accept="application/pdf">
+            <div class="dz-icon">📄</div>
+            <div class="dz-text" id="dzText"><strong>Klik untuk pilih file</strong> atau seret PDF ke sini</div>
+          </label>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="submitBtn">Kirim Berkas</button>
+        <span class="status-msg" id="statusMsg"></span>
+      </div>
+    </form>
+  </div>
+
+  <footer class="foot">Berkas tersimpan otomatis ke Google Drive &amp; tercatat di Google Sheets.</footer>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
