@@ -20,10 +20,15 @@ let allRows = [];
 let currentFilter = 'all';
 let activeRow = null;
 let modalFile = null;
+let isModalOpen = false;
 
 // ---------- Load data ----------
-async function loadData() {
-  tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Memuat data…</td></tr>`;
+// silent=true dipakai untuk auto-refresh: tidak menampilkan ulang "Memuat data..."
+// supaya tabel tidak berkedip/reset posisi scroll setiap beberapa detik.
+async function loadData(silent = false) {
+  if (!silent) {
+    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Memuat data…</td></tr>`;
+  }
 
   if (!API_URL || API_URL.includes('PASTE_URL')) {
     tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">API_URL belum dikonfigurasi (lihat assets/config.js).</td></tr>`;
@@ -38,7 +43,11 @@ async function loadData() {
     renderStats();
     renderTable();
   } catch (err) {
-    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Gagal memuat data: ${err.message}</td></tr>`;
+    if (!silent) {
+      tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Gagal memuat data: ${err.message}</td></tr>`;
+    }
+    // Kalau silent (auto-refresh) dan gagal, biarkan data lama tetap tampil di layar,
+    // tidak perlu mengganggu pengguna yang sedang melihat tabel.
   }
 }
 
@@ -150,11 +159,13 @@ function openModal(id) {
   modalMsg.textContent = '';
   modalMsg.className = 'status-msg';
   modalOverlay.classList.add('open');
+  isModalOpen = true;
 }
 
 function closeModal() {
   modalOverlay.classList.remove('open');
   activeRow = null;
+  isModalOpen = false;
 }
 modalCancel.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
@@ -226,3 +237,19 @@ modalSubmit.addEventListener('click', async () => {
 
 // ---------- Init ----------
 loadData();
+
+// ---------- Auto-refresh ----------
+// Setiap 20 detik, ambil data terbaru tanpa perlu klik tombol Muat Ulang.
+// Dilewati kalau: modal verifikasi sedang terbuka, atau tab browser sedang tidak aktif
+// (supaya tidak buang-buang kuota request saat halaman ditinggal di background).
+setInterval(() => {
+  if (isModalOpen) return;
+  if (document.hidden) return;
+  loadData(true);
+}, 20000);
+
+// Begitu pengguna kembali ke tab ini setelah pindah tab, langsung refresh sekali
+// supaya data yang dilihat tidak basi.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && !isModalOpen) loadData(true);
+});
