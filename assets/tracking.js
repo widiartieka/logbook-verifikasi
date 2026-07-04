@@ -63,6 +63,19 @@ function formatDate(iso) {
     ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 }
 
+// Ubah nomor telepon lokal (mis. 08123456789) jadi link wa.me (mis. https://wa.me/628123456789)
+function toWaLink(phoneRaw) {
+  if (!phoneRaw) return null;
+  let digits = String(phoneRaw).replace(/\D/g, ''); // buang semua karakter selain angka
+  if (!digits) return null;
+  if (digits.startsWith('0')) {
+    digits = '62' + digits.slice(1);
+  } else if (!digits.startsWith('62')) {
+    digits = '62' + digits;
+  }
+  return `https://wa.me/${digits}`;
+}
+
 function renderTable() {
   const q = searchInput.value.trim().toLowerCase();
 
@@ -84,7 +97,7 @@ function renderTable() {
       <td><span class="badge-cabang">${escapeHtml(r['Cabang'] || '-')}</span></td>
       <td class="cell-pic">
         <span class="name">${escapeHtml(r['Nama PIC'] || '-')}</span>
-        <span class="phone">${escapeHtml(r['No Telpon'] || '')}</span>
+        ${r['No Telpon'] ? `<a class="phone" href="${toWaLink(r['No Telpon'])}" target="_blank" style="color:var(--success); text-decoration:none;">💬 ${escapeHtml(r['No Telpon'])}</a>` : ''}
       </td>
       <td class="cell-nc">${escapeHtml(r['No Payment Request'] || '-')}</td>
       <td>${r['File Berkas'] ? `<a class="link-inline" href="${r['File Berkas']}" target="_blank">Lihat PDF</a>` : '–'}</td>
@@ -141,7 +154,8 @@ function closeModal() {
 modalCancel.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
 
-modalDropzone.addEventListener('click', () => modalFileInput.click());
+// Catatan: input file sudah di dalam <label>, klik label otomatis buka dialog file.
+// Tidak perlu modalFileInput.click() manual (itu penyebab bug harus klik 2x).
 modalFileInput.addEventListener('change', () => {
   if (modalFileInput.files.length) {
     const f = modalFileInput.files[0];
