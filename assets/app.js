@@ -19,7 +19,9 @@ cabangCustom.addEventListener('input', () => {
 });
 
 // ---------- Dropzone ----------
-dropzone.addEventListener('click', () => fileInput.click());
+// Catatan: input file sudah ada di DALAM elemen <label>, jadi klik ke label
+// otomatis membuka dialog file (perilaku bawaan browser). Tidak perlu
+// memanggil fileInput.click() manual di sini -- itu penyebab bug harus klik 2x.
 dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
 dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
 dropzone.addEventListener('drop', (e) => {
@@ -60,9 +62,33 @@ form.addEventListener('submit', async (e) => {
   statusMsg.className = 'status-msg';
 
   const cabang = cabangSelect.value === '__custom' ? cabangCustom.value.trim() : cabangSelect.value;
+  const namaPic = document.getElementById('namaPic').value.trim();
+  const noTelpon = document.getElementById('noTelpon').value.trim();
+  const noPaymentRequest = document.getElementById('noPaymentRequest').value.trim();
+  const linkPaymentRequest = document.getElementById('linkPaymentRequest').value.trim();
 
   if (!cabang || cabang.length < 2) {
     statusMsg.textContent = 'Kode cabang wajib diisi.';
+    statusMsg.classList.add('err');
+    return;
+  }
+  if (!namaPic) {
+    statusMsg.textContent = 'Nama PIC wajib diisi.';
+    statusMsg.classList.add('err');
+    return;
+  }
+  if (!noTelpon) {
+    statusMsg.textContent = 'No. Telepon PIC wajib diisi.';
+    statusMsg.classList.add('err');
+    return;
+  }
+  if (!noPaymentRequest) {
+    statusMsg.textContent = 'No. Payment Request wajib diisi.';
+    statusMsg.classList.add('err');
+    return;
+  }
+  if (!linkPaymentRequest) {
+    statusMsg.textContent = 'Link Payment Request wajib diisi.';
     statusMsg.classList.add('err');
     return;
   }
@@ -86,10 +112,10 @@ form.addEventListener('submit', async (e) => {
     const payload = {
       action: 'submit',
       cabang: cabang,
-      namaPic: document.getElementById('namaPic').value.trim(),
-      noTelpon: document.getElementById('noTelpon').value.trim(),
-      noPaymentRequest: document.getElementById('noPaymentRequest').value.trim(),
-      linkPaymentRequest: document.getElementById('linkPaymentRequest').value.trim(),
+      namaPic: namaPic,
+      noTelpon: noTelpon,
+      noPaymentRequest: noPaymentRequest,
+      linkPaymentRequest: linkPaymentRequest,
       fileName: selectedFile.name,
       fileData: fileData
     };
