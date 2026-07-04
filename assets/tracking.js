@@ -23,10 +23,10 @@ let modalFile = null;
 
 // ---------- Load data ----------
 async function loadData() {
-  tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">Memuat data…</td></tr>`;
+  tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Memuat data…</td></tr>`;
 
   if (!API_URL || API_URL.includes('PASTE_URL')) {
-    tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">API_URL belum dikonfigurasi (lihat assets/config.js).</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">API_URL belum dikonfigurasi (lihat assets/config.js).</td></tr>`;
     return;
   }
 
@@ -38,7 +38,7 @@ async function loadData() {
     renderStats();
     renderTable();
   } catch (err) {
-    tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">Gagal memuat data: ${err.message}</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Gagal memuat data: ${err.message}</td></tr>`;
   }
 }
 
@@ -88,7 +88,7 @@ function renderTable() {
   });
 
   if (rows.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="em-icon">🗂️</div>Tidak ada data yang cocok.</div></td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="em-icon">🗂️</div>Tidak ada data yang cocok.</div></td></tr>`;
     return;
   }
 
@@ -100,10 +100,15 @@ function renderTable() {
         ${r['No Telpon'] ? `<a class="phone" href="${toWaLink(r['No Telpon'])}" target="_blank" style="color:var(--success); text-decoration:none;">💬 ${escapeHtml(r['No Telpon'])}</a>` : ''}
       </td>
       <td class="cell-nc">${escapeHtml(r['No Payment Request'] || '-')}</td>
-      <td>${r['File Berkas'] ? `<a class="link-inline" href="${r['File Berkas']}" target="_blank">Lihat PDF</a>` : '–'}</td>
-      <td>${formatDate(r['Timestamp Kirim'])}</td>
+      <td class="cell-pic">
+        ${r['File Berkas'] ? `<a class="link-inline" href="${r['File Berkas']}" target="_blank">Lihat PDF</a>` : '<span style="color:var(--ink-soft);">–</span>'}
+        <span class="phone">${formatDate(r['Timestamp Kirim'])}</span>
+      </td>
       <td><span class="pill ${statusPillClass(r['Status'])}">${escapeHtml(r['Status'] || 'Menunggu Verifikasi')}</span></td>
-      <td>${r['File Hasil Verifikasi'] ? `<a class="link-inline" href="${r['File Hasil Verifikasi']}" target="_blank">Lihat Hasil</a>` : '–'}</td>
+      <td class="cell-pic">
+        ${r['File Hasil Verifikasi'] ? `<a class="link-inline" href="${r['File Hasil Verifikasi']}" target="_blank">Lihat Hasil</a>` : '<span style="color:var(--ink-soft);">–</span>'}
+        ${r['Tanggal Verifikasi'] ? `<span class="phone">${formatDate(r['Tanggal Verifikasi'])}</span>` : ''}
+      </td>
       <td>${r['Status'] === 'Menunggu Verifikasi'
           ? `<button class="btn btn-primary btn-sm" data-id="${r['ID']}">Verifikasi</button>`
           : `<button class="btn btn-ghost btn-sm" data-id="${r['ID']}">Ubah</button>`}
