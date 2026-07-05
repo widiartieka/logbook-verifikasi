@@ -36,9 +36,17 @@ fileInput.addEventListener('change', () => {
   if (fileInput.files.length) handleFile(fileInput.files[0]);
 });
 
+const MAX_FILE_SIZE_MB = 10;
+
 function handleFile(file) {
   if (file.type !== 'application/pdf') {
     dzText.innerHTML = '<span style="color:#C0392B;font-weight:600;">File harus berformat PDF</span>';
+    selectedFile = null;
+    return;
+  }
+  if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    dzText.innerHTML = `<span style="color:#C0392B;font-weight:600;">Ukuran file ${sizeMb}MB melebihi batas maksimal ${MAX_FILE_SIZE_MB}MB</span>`;
     selectedFile = null;
     return;
   }
@@ -104,7 +112,17 @@ form.addEventListener('submit', async (e) => {
   }
 
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Mengirim…';
+  submitBtn.textContent = 'Menyiapkan berkas…';
+  statusMsg.textContent = 'Mohon tunggu, estimasi 5-15 detik tergantung ukuran file & koneksi.';
+  statusMsg.className = 'status-msg';
+
+  // Pesan berjalan supaya proses tidak terasa "diam" saat menunggu Apps Script memproses.
+  const progressSteps = ['Mengunggah ke server…', 'Menyimpan ke Google Drive…', 'Mencatat ke Google Sheets…', 'Hampir selesai…'];
+  let stepIndex = 0;
+  const progressTimer = setInterval(() => {
+    submitBtn.textContent = progressSteps[stepIndex % progressSteps.length];
+    stepIndex++;
+  }, 2200);
 
   try {
     const fileData = await fileToBase64(selectedFile);
@@ -141,6 +159,7 @@ form.addEventListener('submit', async (e) => {
     statusMsg.textContent = 'Gagal: ' + err.message;
     statusMsg.classList.add('err');
   } finally {
+    clearInterval(progressTimer);
     submitBtn.disabled = false;
     submitBtn.textContent = 'Kirim Berkas';
   }
