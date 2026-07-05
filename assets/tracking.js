@@ -3,6 +3,7 @@ const tableBody = document.getElementById('tableBody');
 const searchInput = document.getElementById('searchInput');
 const filterTabs = document.getElementById('filterTabs');
 const refreshBtn = document.getElementById('refreshBtn');
+const lastUpdated = document.getElementById('lastUpdated');
 
 const modalOverlay = document.getElementById('modalOverlay');
 const modalSub = document.getElementById('modalSub');
@@ -29,6 +30,7 @@ let isFetching = false; // cegah request numpuk kalau refresh sebelumnya belum s
 async function loadData(silent = false) {
   if (isFetching) return; // sedang ada request berjalan, lewati dulu supaya tidak tumpuk
   isFetching = true;
+  if (lastUpdated) lastUpdated.textContent = '⏳ memperbarui…';
 
   if (!silent) {
     tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Memuat data…</td></tr>`;
@@ -47,10 +49,18 @@ async function loadData(silent = false) {
     allRows = result.data;
     renderStats();
     renderTable();
+    if (lastUpdated) {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      lastUpdated.textContent = `🟢 diperbarui ${hh}:${mm}:${ss}`;
+    }
   } catch (err) {
     if (!silent) {
       tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Gagal memuat data: ${err.message}</td></tr>`;
     }
+    if (lastUpdated) lastUpdated.textContent = '🔴 gagal memperbarui';
     // Kalau silent (auto-refresh) dan gagal, biarkan data lama tetap tampil di layar,
     // tidak perlu mengganggu pengguna yang sedang melihat tabel.
   } finally {
@@ -246,14 +256,14 @@ modalSubmit.addEventListener('click', async () => {
 loadData();
 
 // ---------- Auto-refresh ----------
-// Setiap 4 detik, ambil data terbaru tanpa perlu klik tombol Muat Ulang.
+// Setiap 3 detik, ambil data terbaru tanpa perlu klik tombol Muat Ulang.
 // Dilewati kalau: modal verifikasi sedang terbuka, ada request lain masih berjalan,
 // atau tab browser sedang tidak aktif (hemat kuota saat halaman ditinggal di background).
 setInterval(() => {
   if (isModalOpen) return;
   if (document.hidden) return;
   loadData(true);
-}, 4000);
+}, 3000);
 
 // Begitu pengguna kembali ke tab ini setelah pindah tab, langsung refresh sekali
 // supaya data yang dilihat tidak basi.
