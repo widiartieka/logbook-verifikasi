@@ -21,17 +21,22 @@ let currentFilter = 'all';
 let activeRow = null;
 let modalFile = null;
 let isModalOpen = false;
+let isFetching = false; // cegah request numpuk kalau refresh sebelumnya belum selesai
 
 // ---------- Load data ----------
 // silent=true dipakai untuk auto-refresh: tidak menampilkan ulang "Memuat data..."
 // supaya tabel tidak berkedip/reset posisi scroll setiap beberapa detik.
 async function loadData(silent = false) {
+  if (isFetching) return; // sedang ada request berjalan, lewati dulu supaya tidak tumpuk
+  isFetching = true;
+
   if (!silent) {
     tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Memuat data…</td></tr>`;
   }
 
   if (!API_URL || API_URL.includes('PASTE_URL')) {
     tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">API_URL belum dikonfigurasi (lihat assets/config.js).</td></tr>`;
+    isFetching = false;
     return;
   }
 
@@ -48,6 +53,8 @@ async function loadData(silent = false) {
     }
     // Kalau silent (auto-refresh) dan gagal, biarkan data lama tetap tampil di layar,
     // tidak perlu mengganggu pengguna yang sedang melihat tabel.
+  } finally {
+    isFetching = false;
   }
 }
 
@@ -239,14 +246,14 @@ modalSubmit.addEventListener('click', async () => {
 loadData();
 
 // ---------- Auto-refresh ----------
-// Setiap 8 detik, ambil data terbaru tanpa perlu klik tombol Muat Ulang.
-// Dilewati kalau: modal verifikasi sedang terbuka, atau tab browser sedang tidak aktif
-// (supaya tidak buang-buang kuota request saat halaman ditinggal di background).
+// Setiap 4 detik, ambil data terbaru tanpa perlu klik tombol Muat Ulang.
+// Dilewati kalau: modal verifikasi sedang terbuka, ada request lain masih berjalan,
+// atau tab browser sedang tidak aktif (hemat kuota saat halaman ditinggal di background).
 setInterval(() => {
   if (isModalOpen) return;
   if (document.hidden) return;
   loadData(true);
-}, 8000);
+}, 4000);
 
 // Begitu pengguna kembali ke tab ini setelah pindah tab, langsung refresh sekali
 // supaya data yang dilihat tidak basi.
