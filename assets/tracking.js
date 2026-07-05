@@ -239,14 +239,14 @@ modalSubmit.addEventListener('click', async () => {
 loadData();
 
 // ---------- Auto-refresh ----------
-// Setiap 20 detik, ambil data terbaru tanpa perlu klik tombol Muat Ulang.
+// Setiap 8 detik, ambil data terbaru tanpa perlu klik tombol Muat Ulang.
 // Dilewati kalau: modal verifikasi sedang terbuka, atau tab browser sedang tidak aktif
 // (supaya tidak buang-buang kuota request saat halaman ditinggal di background).
 setInterval(() => {
   if (isModalOpen) return;
   if (document.hidden) return;
   loadData(true);
-}, 20000);
+}, 8000);
 
 // Begitu pengguna kembali ke tab ini setelah pindah tab, langsung refresh sekali
 // supaya data yang dilihat tidak basi.
