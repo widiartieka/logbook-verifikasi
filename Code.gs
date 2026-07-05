@@ -75,9 +75,26 @@ function saveFile(folder, fileName, base64Data, prefix) {
   return file.getUrl();
 }
 
+// Membuat nomor ID tersistem, format: NCT-0007/050726
+// - "NCT" = kode sistem (NC Tracker Tax)
+// - "0007" = nomor urut dokumen (urutan ke berapa sejak sistem dipakai, 4 digit)
+// - "050726" = tanggal dokumen dikirim, format DDMMYY (5 Juli 2026)
+function pad(num, size) {
+  let s = String(num);
+  while (s.length < size) s = '0' + s;
+  return s;
+}
+
+function generateId(sheet) {
+  const seq = sheet.getLastRow(); // baris 1 = header, jadi ini pas jadi nomor urut data ke-berapa
+  const seqPadded = pad(seq, 4);
+  const dateStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'ddMMyy');
+  return 'NCT-' + seqPadded + '/' + dateStr;
+}
+
 function submitData(body) {
   const sheet = getSheet();
-  const id = 'PR-' + new Date().getTime();
+  const id = generateId(sheet);
   const folder = getFolder(FOLDER_MASUK_NAME);
   const fileUrl = saveFile(folder, body.fileName, body.fileData, id);
 
